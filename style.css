@@ -1,0 +1,727 @@
+/* ============================================================
+   HOLO//RUNNER  —  Cyberpunk Holographic UI
+   Premium Edition
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --cyan: #00fff2;
+  --cyan-dim: rgba(0, 255, 242, 0.4);
+  --magenta: #ff00ff;
+  --blue: #0088ff;
+  --electric-blue: #4488ff;
+  --red: #ff2244;
+  --orange: #ff6622;
+  --bg: #0a0a0f;
+  --panel-bg: rgba(0, 20, 30, 0.65);
+  --panel-border: rgba(0, 255, 242, 0.2);
+  --panel-glow: rgba(0, 255, 242, 0.08);
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
+  --font-ui: 'Rajdhani', sans-serif;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---- Canvas ---- */
+#game-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+/* ---- Flash Overlay ---- */
+#flash-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+}
+
+/* ---- Scanline Overlay ---- */
+#scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 150;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 242, 0.015) 2px,
+    rgba(0, 255, 242, 0.015) 4px
+  );
+}
+
+#scanlines::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 242, 0.06),
+    transparent
+  );
+  animation: scanBeam 4s linear infinite;
+}
+
+@keyframes scanBeam {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100vh); }
+}
+
+/* ---- Vignette Overlay ---- */
+#vignette {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 140;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+/* ===========================================================
+   LOADING SCREEN
+   =========================================================== */
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+/* Pulsing ring spinner */
+.loading-ring {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 2rem;
+  border: 3px solid rgba(0, 255, 242, 0.1);
+  border-top: 3px solid var(--cyan);
+  border-right: 3px solid var(--magenta);
+  border-radius: 50%;
+  animation: ringSpinOuter 1.2s linear infinite;
+  position: relative;
+}
+
+.loading-ring::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 2px solid rgba(255, 0, 255, 0.1);
+  border-top: 2px solid var(--magenta);
+  border-left: 2px solid var(--cyan);
+  border-radius: 50%;
+  animation: ringSpinInner 0.8s linear infinite reverse;
+}
+
+@keyframes ringSpinOuter {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringSpinInner {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Titles (shared) ---- */
+.loading-title,
+.start-title,
+.gameover-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: 0.12em;
+  color: var(--cyan);
+  text-shadow:
+    0 0 20px var(--cyan),
+    0 0 60px rgba(0, 255, 242, 0.3),
+    0 0 120px rgba(0, 255, 242, 0.1);
+}
+
+.sep {
+  color: var(--magenta);
+  text-shadow:
+    0 0 20px var(--magenta),
+    0 0 60px rgba(255, 0, 255, 0.3);
+}
+
+.loading-sub,
+.start-sub,
+.gameover-sub {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--cyan-dim);
+  margin: 1rem 0 2rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  animation: flicker 3s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Loading bar */
+#loading-bar {
+  width: 300px;
+  max-width: 80vw;
+  height: 3px;
+  background: rgba(0, 255, 242, 0.08);
+  border: 1px solid var(--panel-border);
+  margin: 0 auto;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--cyan));
+  background-size: 200% 100%;
+  animation: barShimmer 1.5s linear infinite;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+@keyframes barShimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: 0% 0; }
+}
+
+/* ===========================================================
+   START SCREEN
+   =========================================================== */
+#start-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(10, 10, 15, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.start-content {
+  text-align: center;
+  animation: fadeSlideIn 0.6s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Glitch effect on title */
+.start-title {
+  position: relative;
+}
+
+.start-title::before,
+.start-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: 0.12em;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.start-title::before {
+  color: var(--magenta);
+  text-shadow: 0 0 20px var(--magenta);
+  animation: glitchTop 3s ease-in-out infinite;
+  clip-path: inset(0 0 65% 0);
+}
+
+.start-title::after {
+  color: var(--blue);
+  text-shadow: 0 0 20px var(--blue);
+  animation: glitchBottom 3s ease-in-out infinite;
+  clip-path: inset(60% 0 0 0);
+}
+
+@keyframes glitchTop {
+  0%, 90%, 100% { transform: translateX(0); }
+  92% { transform: translateX(-4px); }
+  94% { transform: translateX(3px); }
+  96% { transform: translateX(-2px); }
+}
+
+@keyframes glitchBottom {
+  0%, 90%, 100% { transform: translateX(0); }
+  91% { transform: translateX(3px); }
+  93% { transform: translateX(-4px); }
+  95% { transform: translateX(2px); }
+}
+
+/* Controls info */
+.controls-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 24px;
+  margin: 2rem 0 2.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: rgba(0, 255, 242, 0.4);
+  letter-spacing: 0.15em;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--cyan);
+  border: 1px solid var(--panel-border);
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(0, 255, 242, 0.05);
+}
+
+/* ---- Holographic Button ---- */
+.holo-btn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 14px 52px;
+  background: transparent;
+  color: var(--cyan);
+  border: 2px solid var(--cyan);
+  cursor: pointer;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s ease;
+}
+
+.holo-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 242, 0.15),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.holo-btn:hover {
+  background: rgba(0, 255, 242, 0.08);
+  box-shadow:
+    0 0 25px rgba(0, 255, 242, 0.25),
+    0 0 60px rgba(0, 255, 242, 0.1),
+    inset 0 0 25px rgba(0, 255, 242, 0.05);
+  text-shadow: 0 0 12px var(--cyan);
+}
+
+.holo-btn:hover::before {
+  left: 100%;
+}
+
+.holo-btn.reboot {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.holo-btn.reboot:hover {
+  background: rgba(255, 34, 68, 0.08);
+  box-shadow:
+    0 0 25px rgba(255, 34, 68, 0.25),
+    0 0 60px rgba(255, 34, 68, 0.1),
+    inset 0 0 25px rgba(255, 34, 68, 0.05);
+  text-shadow: 0 0 12px var(--red);
+}
+
+.holo-btn.reboot::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 34, 68, 0.15),
+    transparent
+  );
+}
+
+/* ===========================================================
+   HUD
+   =========================================================== */
+#hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 10px 18px;
+  border-radius: 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  animation: panelGlow 4s ease-in-out infinite;
+}
+
+@keyframes panelGlow {
+  0%, 100% { box-shadow: 0 0 8px var(--panel-glow), inset 0 0 8px var(--panel-glow); }
+  50%      { box-shadow: 0 0 16px var(--panel-glow), inset 0 0 16px var(--panel-glow); }
+}
+
+.hud-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
+}
+
+.hud-label {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 0.6rem;
+  color: var(--cyan-dim);
+  letter-spacing: 0.25em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+/* Top bar */
+.hud-top {
+  position: absolute;
+  top: 20px;
+  left: 20px; right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+#score {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-shadow: 0 0 10px var(--cyan);
+  transition: text-shadow 0.3s;
+}
+
+.hud-compass {
+  text-align: right;
+}
+
+#compass {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+
+/* Bottom left — health */
+.hud-bottom-left {
+  position: absolute;
+  bottom: 20px; left: 20px;
+}
+
+.hud-bottom-left .hud-panel {
+  min-width: 200px;
+}
+
+.health-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 255, 242, 0.08);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+#health-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), #00ff88);
+  transition: width 0.3s ease, background 0.3s ease;
+  box-shadow: 0 0 8px var(--cyan);
+  border-radius: 4px;
+}
+
+#health-text {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Bottom right — speed & fragments */
+.hud-bottom-right {
+  position: absolute;
+  bottom: 20px; right: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.hud-stat {
+  text-align: center;
+  min-width: 70px;
+}
+
+#speed-display,
+#collection-count {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* ===========================================================
+   CROSSHAIR
+   =========================================================== */
+.crosshair {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ch {
+  position: absolute;
+  background: rgba(0, 255, 242, 0.45);
+}
+
+.ch-t { width: 1px; height: 10px; left: 0; top: -18px; }
+.ch-b { width: 1px; height: 10px; left: 0; bottom: -18px; }
+.ch-l { width: 10px; height: 1px; top: 0; left: -18px; }
+.ch-r { width: 10px; height: 1px; top: 0; right: -18px; }
+
+.ch-dot {
+  position: absolute;
+  width: 3px; height: 3px;
+  background: var(--cyan);
+  border-radius: 50%;
+  top: -1px; left: -1px;
+  box-shadow: 0 0 6px var(--cyan);
+}
+
+.ch-ring {
+  position: absolute;
+  width: 20px; height: 20px;
+  border: 1px solid rgba(0, 255, 242, 0.15);
+  border-radius: 50%;
+  top: -10px; left: -10px;
+  animation: crosshairPulse 2s ease-in-out infinite;
+}
+
+@keyframes crosshairPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50%      { transform: scale(1.3); opacity: 0.1; }
+}
+
+/* ===========================================================
+   GAME OVER SCREEN
+   =========================================================== */
+#game-over-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(10, 5, 5, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.gameover-content {
+  text-align: center;
+  animation: fadeSlideIn 0.5s ease-out;
+}
+
+.gameover-title {
+  color: var(--red) !important;
+  text-shadow:
+    0 0 20px var(--red),
+    0 0 60px rgba(255, 34, 68, 0.3),
+    0 0 120px rgba(255, 34, 68, 0.1) !important;
+  position: relative;
+}
+
+.gameover-title::before,
+.gameover-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 4rem);
+  letter-spacing: 0.12em;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gameover-title::before {
+  color: var(--orange);
+  text-shadow: 0 0 20px var(--orange);
+  animation: glitchTop 2s ease-in-out infinite;
+  clip-path: inset(0 0 65% 0);
+}
+
+.gameover-title::after {
+  color: var(--red);
+  text-shadow: 0 0 20px var(--red);
+  animation: glitchBottom 2s ease-in-out infinite;
+  clip-path: inset(60% 0 0 0);
+}
+
+.gameover-sub {
+  color: rgba(255, 100, 100, 0.5) !important;
+}
+
+.gameover-score-label {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  color: rgba(255, 100, 100, 0.35);
+  letter-spacing: 0.3em;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+}
+
+#final-score {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--red);
+  text-shadow: 0 0 20px var(--red);
+  margin-bottom: 2rem;
+}
+
+/* ===========================================================
+   BODY SCANLINE (subtle CRT effect)
+   =========================================================== */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 4px
+  );
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ===========================================================
+   RESPONSIVE
+   =========================================================== */
+@media (max-width: 600px) {
+  .loading-title,
+  .start-title,
+  .gameover-title {
+    font-size: 1.8rem;
+  }
+
+  .hud-panel {
+    padding: 6px 10px;
+  }
+
+  #score {
+    font-size: 1rem;
+  }
+
+  .hud-top {
+    top: 10px;
+    left: 10px; right: 10px;
+  }
+
+  .hud-bottom-left {
+    bottom: 10px; left: 10px;
+  }
+
+  .hud-bottom-left .hud-panel {
+    min-width: 140px;
+  }
+
+  .hud-bottom-right {
+    bottom: 10px; right: 10px;
+    gap: 8px;
+  }
+
+  .controls-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #final-score {
+    font-size: 1.8rem;
+  }
+
+  .holo-btn {
+    padding: 10px 30px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .loading-title,
+  .start-title,
+  .gameover-title {
+    font-size: 1.4rem;
+  }
+
+  .hud-bottom-right {
+    flex-direction: column;
+    gap: 6px;
+  }
+}

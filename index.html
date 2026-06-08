@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOLO//RUNNER — Holographic Game</title>
+  <meta name="description" content="Navigate through a holographic digital world. Collect data fragments and survive the grid in this cyberpunk 3D game.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Flash Overlay -->
+  <div id="flash-overlay"></div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div class="loading-ring"></div>
+      <div class="loading-title">HOLO<span class="sep">//</span>RUNNER</div>
+      <div class="loading-sub">INITIALIZING HOLOGRAPHIC MATRIX...</div>
+      <div id="loading-bar">
+        <div id="loading-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen" style="display:none;">
+    <div class="start-content">
+      <h1 class="start-title" data-text="HOLO//RUNNER">HOLO<span class="sep">//</span>RUNNER</h1>
+      <p class="start-sub">NAVIGATE THE HOLOGRAPHIC GRID</p>
+      <div class="controls-info">
+        <div class="control-row"><span class="key">W A S D</span> <span>Move</span></div>
+        <div class="control-row"><span class="key">MOUSE</span> <span>Look Around</span></div>
+        <div class="control-row"><span class="key">SHIFT</span> <span>Sprint</span></div>
+        <div class="control-row"><span class="key">SPACE</span> <span>Jump</span></div>
+      </div>
+      <button id="start-btn" class="holo-btn">▶ INITIALIZE</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" style="display:none;">
+    <div class="hud-top">
+      <div class="hud-panel hud-score">
+        <div class="hud-label">SCORE</div>
+        <div id="score">00000000</div>
+      </div>
+      <div class="hud-panel hud-compass">
+        <div class="hud-label">BEARING</div>
+        <div id="compass">N 0°</div>
+      </div>
+    </div>
+    <div class="hud-bottom-left">
+      <div class="hud-panel">
+        <div class="hud-label">INTEGRITY</div>
+        <div class="health-bar">
+          <div id="health-bar-fill"></div>
+        </div>
+        <div id="health-text">100</div>
+      </div>
+    </div>
+    <div class="hud-bottom-right">
+      <div class="hud-panel hud-stat">
+        <div class="hud-label">VELOCITY</div>
+        <div id="speed-display">0.0</div>
+      </div>
+      <div class="hud-panel hud-stat">
+        <div class="hud-label">◆ DATA</div>
+        <div id="collection-count">0</div>
+      </div>
+    </div>
+    <div class="crosshair">
+      <div class="ch ch-t"></div>
+      <div class="ch ch-b"></div>
+      <div class="ch ch-l"></div>
+      <div class="ch ch-r"></div>
+      <div class="ch-dot"></div>
+      <div class="ch-ring"></div>
+    </div>
+  </div>
+
+  <!-- Scanline Overlay -->
+  <div id="scanlines"></div>
+  <!-- Vignette Overlay -->
+  <div id="vignette"></div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over-screen" style="display:none;">
+    <div class="gameover-content">
+      <h1 class="gameover-title" data-text="SYSTEM//FAILURE">SYSTEM<span class="sep">//</span>FAILURE</h1>
+      <div class="gameover-sub">HOLOGRAPHIC INTEGRITY COMPROMISED</div>
+      <div class="gameover-score-label">FINAL SCORE</div>
+      <div id="final-score">00000000</div>
+      <button id="reboot-btn" class="holo-btn reboot">⟳ REBOOT</button>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
