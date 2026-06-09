@@ -26,13 +26,11 @@ const CFG = {
     mouseSensitivity: 0.002,
     collisionRadius: 0.4,
     maxHealth: 100,
-    damageCooldown: 1.2,
     bobSpeed: 10,
     bobAmount: 0.04,
   },
   structures: { count: 80, minDist: 12 },
   fragments: { count: 30, respawnDelay: 5 },
-  sentinels: { count: 10 },
   particles: { ambient: 300, burst: 60 },
   bloom: { strength: 1.5, radius: 0.4, threshold: 0.2 },
   colors: {
@@ -56,7 +54,6 @@ const state = {
   health: CFG.player.maxHealth,
   collected: 0,
   time: 0,
-  damageCooldownTimer: 0,
   screenShake: 0,
   screenFlash: { r: 0, g: 0, b: 0, a: 0 },
   sprintChromaticAberration: 0,
@@ -559,75 +556,6 @@ function respawnFragment(frag) {
   frag.visible = true;
 }
 
-// ============================================================================
-// §10  SENTINEL OBSTACLES
-// ============================================================================
-
-const sentinels = [];
-
-function createSentinel() {
-  const group = new THREE.Group();
-  const geo = new THREE.DodecahedronGeometry(0.6, 0);
-  const edges = new THREE.EdgesGeometry(geo);
-  const color = Math.random() > 0.5 ? 0xff2244 : 0xff6622;
-  const lineMat = new THREE.LineBasicMaterial({ color, linewidth: 2 });
-  const lineSegs = new THREE.LineSegments(edges, lineMat);
-
-  const fillMat = new THREE.MeshBasicMaterial({
-    color,
-    transparent: true,
-    opacity: 0.15,
-  });
-  const fillMesh = new THREE.Mesh(geo, fillMat);
-
-  // Inner glow core
-  const coreGeo = new THREE.SphereGeometry(0.25, 8, 8);
-  const coreMat = new THREE.MeshBasicMaterial({
-    color,
-    transparent: true,
-    opacity: 0.5,
-  });
-  const core = new THREE.Mesh(coreGeo, coreMat);
-
-  const light = new THREE.PointLight(color, 1.0, 10);
-
-  group.add(lineSegs, fillMesh, core, light);
-
-  // Patrol setup
-  const patrolType = Math.random() > 0.5 ? 'circular' : 'linear';
-  const cx = (Math.random() - 0.5) * (CFG.world.size - 60);
-  const cz = (Math.random() - 0.5) * (CFG.world.size - 60);
-  const patrolRadius = 8 + Math.random() * 20;
-  const speed = 1.5 + Math.random() * 3;
-  const patrolAngle = Math.random() * Math.PI * 2;
-  const y = 1.0 + Math.random() * 1.5;
-
-  group.position.set(cx, y, cz);
-
-  group.userData = {
-    patrolType,
-    cx,
-    cz,
-    patrolRadius,
-    speed,
-    patrolAngle,
-    y,
-    lineMat,
-    fillMat,
-    coreMat,
-    light,
-    collisionRadius: 1.0,
-  };
-
-  scene.add(group);
-  sentinels.push(group);
-}
-
-function spawnSentinels() {
-  for (let i = 0; i < CFG.sentinels.count; i++) {
-    createSentinel();
-  }
-}
 
 // ============================================================================
 // §11  PARTICLE SYSTEM (Object-pooled)
@@ -804,15 +732,6 @@ function burstCollect(x, y, z) {
   }
 }
 
-function burstDamage(x, y, z) {
-  for (let i = 0; i < 30; i++) {
-    const speed = 1 + Math.random() * 3;
-    const vx = (Math.random() - 0.5) * speed;
-    const vy = Math.random() * speed;
-    const vz = (Math.random() - 0.5) * speed;
-    particles.emit(x, y, z, vx, vy, vz, 1, 0.1, 0.1, 0.3 + Math.random() * 0.5, 2.5);
-  }
-}
 
 // ============================================================================
 // §12  INPUT HANDLING
@@ -979,11 +898,6 @@ function updatePlayer(dt) {
   state.sprintChromaticAberration = isSprinting
     ? Math.min(state.sprintChromaticAberration + dt * 3, 1)
     : Math.max(state.sprintChromaticAberration - dt * 5, 0);
-
-  // Damage cooldown
-  if (state.damageCooldownTimer > 0) {
-    state.damageCooldownTimer -= dt;
-  }
 }
 
 // ============================================================================
@@ -1011,51 +925,6 @@ function checkFragmentCollection() {
   }
 }
 
-function checkSentinelDamage() {
-  if (state.damageCooldownTimer > 0) return;
-  for (const s of sentinels) {
-    const dx = playerPos.x - s.position.x;
-    const dz = playerPos.z - s.position.z;
-    const dy = playerPos.y - s.position.y;
-    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    if (dist < s.userData.collisionRadius + CFG.player.collisionRadius + 0.3) {
-      state.health -= 15;
-      state.damageCooldownTimer = CFG.player.damageCooldown;
-      state.screenShake = 1;
-      triggerFlash(1, 0.1, 0.1, 0.5);
-      burstDamage(playerPos.x, playerPos.y, playerPos.z);
-      if (state.health <= 0) {
-        state.health = 0;
-        gameOverSequence();
-      }
-      break;
-    }
-  }
-}
-
-function updateSentinels(dt, time) {
-  for (const s of sentinels) {
-    const d = s.userData;
-    d.patrolAngle += d.speed * dt * 0.3;
-
-    if (d.patrolType === 'circular') {
-      s.position.x = d.cx + Math.cos(d.patrolAngle) * d.patrolRadius;
-      s.position.z = d.cz + Math.sin(d.patrolAngle) * d.patrolRadius;
-    } else {
-      s.position.x = d.cx + Math.sin(d.patrolAngle) * d.patrolRadius;
-      s.position.z = d.cz + Math.cos(d.patrolAngle * 0.7) * d.patrolRadius * 0.5;
-    }
-
-    s.position.y = d.y + Math.sin(time * 2 + d.patrolAngle) * 0.3;
-    s.rotation.x += dt * 1.5;
-    s.rotation.z += dt * 0.8;
-
-    // Pulsing glow
-    const pulse = 0.7 + 0.3 * Math.sin(time * 4 + d.patrolAngle);
-    d.light.intensity = pulse * 1.2;
-    d.coreMat.opacity = 0.3 + pulse * 0.3;
-  }
-}
 
 function updateFragments(dt, time) {
   for (const frag of fragments) {
@@ -1201,8 +1070,6 @@ function initGame() {
   structureBBs.length = 0;
   for (const f of fragments) scene.remove(f);
   fragments.length = 0;
-  for (const s of sentinels) scene.remove(s);
-  sentinels.length = 0;
 
   if (particles) {
     scene.remove(particles.points);
@@ -1216,7 +1083,6 @@ function initGame() {
   state.health = CFG.player.maxHealth;
   state.collected = 0;
   state.time = 0;
-  state.damageCooldownTimer = 0;
   state.screenShake = 0;
   state.screenFlash = { r: 0, g: 0, b: 0, a: 0 };
   state.sprintChromaticAberration = 0;
@@ -1232,7 +1098,6 @@ function initGame() {
   // Generate world
   generateStructures();
   spawnFragments();
-  spawnSentinels();
   initParticles();
 }
 
@@ -1278,11 +1143,9 @@ function animate() {
   if (state.running && !state.gameOver) {
     updatePlayer(dt);
     checkFragmentCollection();
-    checkSentinelDamage();
   }
 
   // Always update visuals even when paused (for ambient effects)
-  updateSentinels(dt, time);
   updateFragments(dt, time);
   updateStructures(dt, time);
 
