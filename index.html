@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HOLO//RUNNER — Holographic Game</title>
-  <meta name="description" content="Navigate through a holographic digital world. Collect data fragments and survive the grid in this cyberpunk 3D game.">
+  <title>HOLO//ARCADE — Holographic Game Vault</title>
+  <meta name="description" content="A holographic web arcade. One $4 access key. Every game, forever — no subscriptions, no ads.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="store.css">
   <script type="importmap">
   {
     "imports": {
@@ -19,95 +19,189 @@
   </script>
 </head>
 <body>
-  <canvas id="game-canvas"></canvas>
-
-  <!-- Flash Overlay -->
-  <div id="flash-overlay"></div>
-
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loading-content">
-      <div class="loading-ring"></div>
-      <div class="loading-title">HOLO<span class="sep">//</span>RUNNER</div>
-      <div class="loading-sub">INITIALIZING HOLOGRAPHIC MATRIX...</div>
-      <div id="loading-bar">
-        <div id="loading-bar-fill"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Start Screen -->
-  <div id="start-screen" style="display:none;">
-    <div class="start-content">
-      <h1 class="start-title" data-text="HOLO//RUNNER">HOLO<span class="sep">//</span>RUNNER</h1>
-      <p class="start-sub">NAVIGATE THE HOLOGRAPHIC GRID</p>
-      <div class="controls-info">
-        <div class="control-row"><span class="key">W A S D</span> <span>Move</span></div>
-        <div class="control-row"><span class="key">MOUSE</span> <span>Look Around</span></div>
-        <div class="control-row"><span class="key">SHIFT</span> <span>Sprint</span></div>
-        <div class="control-row"><span class="key">SPACE</span> <span>Jump</span></div>
-      </div>
-      <button id="start-btn" class="holo-btn">▶ INITIALIZE</button>
-    </div>
-  </div>
-
-  <!-- HUD -->
-  <div id="hud" style="display:none;">
-    <div class="hud-top">
-      <div class="hud-panel hud-score">
-        <div class="hud-label">SCORE</div>
-        <div id="score">00000000</div>
-      </div>
-      <div class="hud-panel hud-compass">
-        <div class="hud-label">BEARING</div>
-        <div id="compass">N 0°</div>
-      </div>
-    </div>
-    <div class="hud-bottom-left">
-      <div class="hud-panel">
-        <div class="hud-label">INTEGRITY</div>
-        <div class="health-bar">
-          <div id="health-bar-fill"></div>
-        </div>
-        <div id="health-text">100</div>
-      </div>
-    </div>
-    <div class="hud-bottom-right">
-      <div class="hud-panel hud-stat">
-        <div class="hud-label">VELOCITY</div>
-        <div id="speed-display">0.0</div>
-      </div>
-      <div class="hud-panel hud-stat">
-        <div class="hud-label">◆ DATA</div>
-        <div id="collection-count">0</div>
-      </div>
-    </div>
-    <div class="crosshair">
-      <div class="ch ch-t"></div>
-      <div class="ch ch-b"></div>
-      <div class="ch ch-l"></div>
-      <div class="ch ch-r"></div>
-      <div class="ch-dot"></div>
-      <div class="ch-ring"></div>
-    </div>
-  </div>
-
-  <!-- Scanline Overlay -->
+  <canvas id="bg-canvas"></canvas>
   <div id="scanlines"></div>
-  <!-- Vignette Overlay -->
   <div id="vignette"></div>
 
-  <!-- Game Over Screen -->
-  <div id="game-over-screen" style="display:none;">
-    <div class="gameover-content">
-      <h1 class="gameover-title" data-text="SYSTEM//FAILURE">SYSTEM<span class="sep">//</span>FAILURE</h1>
-      <div class="gameover-sub">HOLOGRAPHIC INTEGRITY COMPROMISED</div>
-      <div class="gameover-score-label">FINAL SCORE</div>
-      <div id="final-score">00000000</div>
-      <button id="reboot-btn" class="holo-btn reboot">⟳ REBOOT</button>
+  <!-- ======================= NAV ======================= -->
+  <nav id="navbar">
+    <a class="nav-logo" href="#top">HOLO<span class="sep">//</span>ARCADE</a>
+    <div class="nav-links">
+      <a href="#games">GAMES</a>
+      <a href="#pricing">PRICING</a>
+    </div>
+    <div class="nav-auth">
+      <button id="signin-btn" class="holo-btn small" data-auth-trigger>⌁ SIGN IN</button>
+      <div id="user-chip" hidden>
+        <img id="user-avatar" alt="" referrerpolicy="no-referrer">
+        <span id="user-name"></span>
+        <button id="signout-btn" title="Sign out">⏻</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================= HERO ======================= -->
+  <header class="hero" id="top">
+    <div class="hero-badge">◈ EARLY ACCESS — VAULT v0.1</div>
+    <h1 class="glitch-title" data-text="HOLO//ARCADE">HOLO<span class="sep">//</span>ARCADE</h1>
+    <p class="hero-sub">A HOLOGRAPHIC GAME VAULT IN YOUR BROWSER</p>
+    <p class="hero-desc">
+      One access key. Every game in the vault — current and future.
+      No subscriptions. No ads. No downloads. Just the grid.
+    </p>
+    <div class="hero-cta">
+      <button class="holo-btn primary" data-auth-trigger>▶ GET ACCESS — $4</button>
+      <a href="#games" class="holo-btn ghost">BROWSE THE VAULT</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">03</span><span class="stat-label">TITLES QUEUED</span></div>
+      <div class="stat-div"></div>
+      <div class="stat"><span class="stat-num">v0.1</span><span class="stat-label">VAULT BUILD</span></div>
+      <div class="stat-div"></div>
+      <div class="stat"><span class="stat-num">$4</span><span class="stat-label">FLAT — FOREVER</span></div>
+    </div>
+    <div class="scroll-hint">▼</div>
+  </header>
+
+  <!-- ======================= GAMES ======================= -->
+  <section id="games" class="section">
+    <div class="section-head reveal">
+      <div class="section-tag">// 01</div>
+      <h2 class="section-title">GAME<span class="sep">//</span>VAULT</h2>
+      <p class="section-sub">LAUNCH LINEUP — MORE TITLES DROP EVERY CYCLE</p>
+    </div>
+
+    <div class="game-grid">
+      <!-- HOLO//RUNNER -->
+      <article class="game-card locked reveal">
+        <div class="card-art art-runner">
+          <span class="art-glyph">▲</span>
+          <div class="card-status dev">◌ IN DEVELOPMENT</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">HOLO<span class="sep">//</span>RUNNER</h3>
+          <p class="card-desc">
+            Sprint through an infinite neon grid. Dodge holographic structures,
+            harvest data fragments, survive the matrix.
+          </p>
+          <div class="card-meta">
+            <span class="meta-chip">FPS</span>
+            <span class="meta-chip">ARCADE</span>
+            <span class="meta-chip">3D</span>
+          </div>
+          <button class="holo-btn card-btn" disabled>⬡ DECRYPTING…</button>
+        </div>
+      </article>
+
+      <!-- NEON//DRIFT -->
+      <article class="game-card locked reveal">
+        <div class="card-art art-drift">
+          <span class="art-glyph">◆</span>
+          <div class="card-status dev">◌ IN DEVELOPMENT</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">NEON<span class="sep">//</span>DRIFT</h3>
+          <p class="card-desc">
+            Anti-grav racing through collapsing data tunnels. Boost, drift,
+            and outrun the purge protocol.
+          </p>
+          <div class="card-meta">
+            <span class="meta-chip">RACING</span>
+            <span class="meta-chip">SPEED</span>
+            <span class="meta-chip">3D</span>
+          </div>
+          <button class="holo-btn card-btn" disabled>⬡ DECRYPTING…</button>
+        </div>
+      </article>
+
+      <!-- GRID//BREAKER -->
+      <article class="game-card locked reveal">
+        <div class="card-art art-breaker">
+          <span class="art-glyph">⬢</span>
+          <div class="card-status dev">◌ IN DEVELOPMENT</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">GRID<span class="sep">//</span>BREAKER</h3>
+          <p class="card-desc">
+            Holographic demolition. Shatter firewall blocks with a plasma
+            paddle before the system reboots you.
+          </p>
+          <div class="card-meta">
+            <span class="meta-chip">ARCADE</span>
+            <span class="meta-chip">PUZZLE</span>
+            <span class="meta-chip">3D</span>
+          </div>
+          <button class="holo-btn card-btn" disabled>⬡ DECRYPTING…</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ======================= PRICING ======================= -->
+  <section id="pricing" class="section">
+    <div class="section-head reveal">
+      <div class="section-tag">// 02</div>
+      <h2 class="section-title">ACCESS<span class="sep">//</span>KEY</h2>
+      <p class="section-sub">ONE PAYMENT. PERMANENT CLEARANCE.</p>
+    </div>
+
+    <div class="price-card reveal">
+      <div class="price-glow"></div>
+      <div class="price-label">FULL VAULT CLEARANCE</div>
+      <div class="price-amount"><span class="currency">$</span>4<span class="price-period">/ FOREVER</span></div>
+      <ul class="price-features">
+        <li><span class="check">◈</span> Every launch title, instantly</li>
+        <li><span class="check">◈</span> All future game drops included</li>
+        <li><span class="check">◈</span> No subscription · no ads · ever</li>
+        <li><span class="check">◈</span> Runs in your browser — zero installs</li>
+        <li><span class="check">◈</span> Cloud saves &amp; leaderboards <span class="soon">SOON</span></li>
+      </ul>
+      <button class="holo-btn primary wide" data-auth-trigger>⌁ INITIALIZE ACCESS</button>
+      <p class="price-note">Sign in first — payment terminal comes online at launch.</p>
+    </div>
+  </section>
+
+  <!-- ======================= FOOTER ======================= -->
+  <footer>
+    <div class="footer-logo">HOLO<span class="sep">//</span>ARCADE</div>
+    <p class="footer-line">TRANSMISSION © 2026 — ALL HOLOGRAMS PROJECTED LOCALLY</p>
+    <div class="footer-links">
+      <a href="#games">VAULT</a><span>·</span>
+      <a href="#pricing">ACCESS</a><span>·</span>
+      <a href="mailto:vansh.attention@gmail.com">CONTACT</a>
+    </div>
+  </footer>
+
+  <!-- ======================= AUTH MODAL ======================= -->
+  <div id="auth-modal" aria-hidden="true">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Sign in">
+      <button class="modal-close" data-modal-close aria-label="Close">✕</button>
+      <div class="modal-tag">// IDENTITY VERIFICATION</div>
+      <h3 class="modal-title">ACCESS<span class="sep">//</span>TERMINAL</h3>
+      <p class="modal-sub">AUTHENTICATE TO ENTER THE VAULT</p>
+
+      <button id="google-btn" class="provider-btn">
+        <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        CONTINUE WITH GOOGLE
+      </button>
+
+      <button id="facebook-btn" class="provider-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="#1877F2" d="M24 12c0-6.63-5.37-12-12-12S0 5.37 0 12c0 5.99 4.39 10.95 10.13 11.85v-8.38H7.08V12h3.05V9.36c0-3.01 1.79-4.67 4.53-4.67 1.31 0 2.69.23 2.69.23v2.95h-1.51c-1.49 0-1.96.93-1.96 1.88V12h3.33l-.53 3.47h-2.8v8.38C19.61 22.95 24 17.99 24 12z"/>
+        </svg>
+        CONTINUE WITH FACEBOOK
+      </button>
+
+      <p id="auth-status" role="status"></p>
     </div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <script type="module" src="store.js"></script>
 </body>
 </html>
