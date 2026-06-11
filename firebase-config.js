@@ -11,10 +11,14 @@
 // ============================================================================
 
 export const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyDHBQFWaCPGGNKa8PlXJ0M-jcpGuzczBd8",
+  authDomain: "holoarcade-682f4.firebaseapp.com",
+  projectId: "holoarcade-682f4",
+  storageBucket: "holoarcade-682f4.firebasestorage.app",
+  messagingSenderId: "955889044364",
+  appId: "1:955889044364:web:4b4be2b92d6538aec2a4a9",
 };
+
+
+
+
